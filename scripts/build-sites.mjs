@@ -102,7 +102,7 @@ if (existsSync(defaultHandlerSource)) {
     serverCompatHandler,
     [
       'import { createRequire } from "node:module";',
-      "const require = createRequire(import.meta.url);",
+      'const require = createRequire(`${process.cwd()}/handler.mjs`);',
       "",
       defaultHandlerContents,
     ].join("\n"),
