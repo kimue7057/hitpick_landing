@@ -30,8 +30,20 @@ function materializeSymlinks(targetPath) {
     const entryStats = lstatSync(entryPath);
 
     if (entryStats.isSymbolicLink()) {
-      const realSourcePath = realpathSync(entryPath);
-      const realSourceStats = statSync(realSourcePath);
+      let realSourcePath;
+      let realSourceStats;
+
+      try {
+        realSourcePath = realpathSync(entryPath);
+        realSourceStats = statSync(realSourcePath);
+      } catch (error) {
+        if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+          rmSync(entryPath, { force: true, recursive: true });
+          continue;
+        }
+
+        throw error;
+      }
 
       rmSync(entryPath, { force: true, recursive: true });
 
