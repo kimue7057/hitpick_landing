@@ -1,4 +1,15 @@
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  cpSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -12,6 +23,36 @@ const serverCompatDir = join(distDir, "server");
 const serverCompatIndex = join(serverCompatDir, "index.js");
 const serverCompatPackageJson = join(serverCompatDir, "package.json");
 const serverCompatPublic = join(serverCompatDir, "public");
+
+function materializeSymlinks(targetPath) {
+  for (const entry of readdirSync(targetPath, { withFileTypes: true })) {
+    const entryPath = join(targetPath, entry.name);
+    const entryStats = lstatSync(entryPath);
+
+    if (entryStats.isSymbolicLink()) {
+      const realSourcePath = realpathSync(entryPath);
+      const realSourceStats = statSync(realSourcePath);
+
+      rmSync(entryPath, { force: true, recursive: true });
+
+      if (realSourceStats.isDirectory()) {
+        cpSync(realSourcePath, entryPath, {
+          dereference: true,
+          recursive: true,
+        });
+        materializeSymlinks(entryPath);
+      } else {
+        copyFileSync(realSourcePath, entryPath);
+      }
+
+      continue;
+    }
+
+    if (entryStats.isDirectory()) {
+      materializeSymlinks(entryPath);
+    }
+  }
+}
 
 const nextBuildResult = spawnSync("next", ["build"], {
   cwd: rootDir,
@@ -36,6 +77,7 @@ if (buildResult.status !== 0) {
 rmSync(distDir, { force: true, recursive: true });
 mkdirSync(distDir, { recursive: true });
 cpSync(openNextDir, distDir, { dereference: true, recursive: true });
+materializeSymlinks(distDir);
 
 mkdirSync(serverCompatDir, { recursive: true });
 writeFileSync(
