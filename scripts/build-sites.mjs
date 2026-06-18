@@ -4,6 +4,7 @@ import {
   existsSync,
   lstatSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
   realpathSync,
   rmSync,
@@ -21,8 +22,10 @@ const hostingSource = join(rootDir, ".openai", "hosting.json");
 const hostingTarget = join(distDir, ".openai", "hosting.json");
 const serverCompatDir = join(distDir, "server");
 const serverCompatIndex = join(serverCompatDir, "index.js");
+const serverCompatHandler = join(serverCompatDir, "handler.mjs");
 const serverCompatPackageJson = join(serverCompatDir, "package.json");
 const serverCompatPublic = join(serverCompatDir, "public");
+const defaultHandlerSource = join(distDir, "server-functions", "default", "handler.mjs");
 
 function materializeSymlinks(targetPath) {
   for (const entry of readdirSync(targetPath, { withFileTypes: true })) {
@@ -92,14 +95,44 @@ cpSync(openNextDir, distDir, { dereference: true, recursive: true });
 materializeSymlinks(distDir);
 
 mkdirSync(serverCompatDir, { recursive: true });
-writeFileSync(
-  serverCompatIndex,
-  [
-    'export { default } from "../worker.js";',
-    'export * from "../worker.js";',
-    "",
-  ].join("\n"),
-);
+
+if (existsSync(defaultHandlerSource)) {
+  const defaultHandlerContents = readFileSync(defaultHandlerSource, "utf8");
+  writeFileSync(
+    serverCompatHandler,
+    [
+      'import { createRequire } from "node:module";',
+      "const require = createRequire(import.meta.url);",
+      "",
+      defaultHandlerContents,
+    ].join("\n"),
+  );
+  writeFileSync(
+    serverCompatIndex,
+    [
+      'import { handler } from "./handler.mjs";',
+      "",
+      "export default {",
+      "  async fetch(request, env, ctx) {",
+      "    return handler(request, env, ctx, request.signal);",
+      "  },",
+      "};",
+      "",
+      'export { handler } from "./handler.mjs";',
+      "",
+    ].join("\n"),
+  );
+} else {
+  writeFileSync(
+    serverCompatIndex,
+    [
+      'export { default } from "../worker.js";',
+      'export * from "../worker.js";',
+      "",
+    ].join("\n"),
+  );
+}
+
 writeFileSync(
   serverCompatPackageJson,
   JSON.stringify({ type: "module" }, null, 2) + "\n",
