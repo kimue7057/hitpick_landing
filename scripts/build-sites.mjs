@@ -26,6 +26,12 @@ const serverCompatHandler = join(serverCompatDir, "handler.mjs");
 const serverCompatPackageJson = join(serverCompatDir, "package.json");
 const serverCompatPublic = join(serverCompatDir, "public");
 const defaultHandlerSource = join(distDir, "server-functions", "default", "handler.mjs");
+const defaultNodeModulesDir = join(
+  distDir,
+  "server-functions",
+  "default",
+  "node_modules",
+);
 
 function materializeSymlinks(targetPath) {
   for (const entry of readdirSync(targetPath, { withFileTypes: true })) {
@@ -93,6 +99,10 @@ rmSync(distDir, { force: true, recursive: true });
 mkdirSync(distDir, { recursive: true });
 cpSync(openNextDir, distDir, { dereference: true, recursive: true });
 materializeSymlinks(distDir);
+
+if (existsSync(defaultNodeModulesDir)) {
+  rmSync(defaultNodeModulesDir, { force: true, recursive: true });
+}
 
 mkdirSync(serverCompatDir, { recursive: true });
 
