@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/build-sites.mjs",
+    "build:github": "node scripts/build-github-pages.mjs",
     "build:next": "next build",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
@@ -38,5 +39,6 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "wrangler": "^4.101.0"
-  }
+  },
+  "packageManager": "pnpm@9.0.0"
 }

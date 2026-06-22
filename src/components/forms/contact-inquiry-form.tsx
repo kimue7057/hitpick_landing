@@ -3,21 +3,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startTransition, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import {
-  activityChannelOptions,
-  budgetRangeOptions,
-  industryOptions,
-  inquiryTypeOptions,
-  interestCampaignOptions,
-  partnershipTypeOptions,
-} from "@/content/contact";
 import { CTAButton } from "@/components/ui/cta-button";
+import { getContactPageContent } from "@/content/contact";
 import {
-  contactInquirySchema,
+  createContactInquirySchema,
   defaultContactInquiryValues,
   submitContactInquiry,
   type ContactInquiryValues,
 } from "@/lib/contact-inquiry";
+import { type Locale } from "@/lib/locale";
 import { cn } from "@/lib/utils";
 
 const fieldClasses =
@@ -50,7 +44,8 @@ function InquiryTypeLabel({
   );
 }
 
-export function ContactInquiryForm() {
+export function ContactInquiryForm({ locale }: { locale: Locale }) {
+  const formContent = getContactPageContent(locale).form;
   const [submittedType, setSubmittedType] = useState<
     ContactInquiryValues["inquiryType"] | null
   >(null);
@@ -63,7 +58,7 @@ export function ContactInquiryForm() {
     reset,
   } = useForm<ContactInquiryValues>({
     defaultValues: defaultContactInquiryValues,
-    resolver: zodResolver(contactInquirySchema),
+    resolver: zodResolver(createContactInquirySchema(formContent.validation)),
     shouldUnregister: true,
   });
 
@@ -89,9 +84,11 @@ export function ContactInquiryForm() {
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <p className="text-sm font-semibold text-slate-950">문의 유형 선택</p>
+        <p className="text-sm font-semibold text-slate-950">
+          {formContent.inquiryTypeLabel}
+        </p>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
-          {inquiryTypeOptions.map((option) => {
+          {formContent.inquiryTypeOptions.map((option) => {
             const selected = inquiryType === option.value;
 
             return (
@@ -123,12 +120,14 @@ export function ContactInquiryForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="text-sm font-medium text-slate-950" htmlFor="contactName">
-            {inquiryType === "advertiser" ? "담당자 이름" : "이름"}
+            {inquiryType === "advertiser"
+              ? formContent.contactNameAdvertiserLabel
+              : formContent.contactNameLabel}
           </label>
           <input
             className={cn(fieldClasses, "mt-2")}
             id="contactName"
-            placeholder="홍길동"
+            placeholder={formContent.contactNamePlaceholder}
             {...register("contactName")}
           />
           <FieldError message={errors.contactName?.message} />
@@ -136,12 +135,12 @@ export function ContactInquiryForm() {
 
         <div>
           <label className="text-sm font-medium text-slate-950" htmlFor="phone">
-            연락처
+            {formContent.phoneLabel}
           </label>
           <input
             className={cn(fieldClasses, "mt-2")}
             id="phone"
-            placeholder="010-1234-5678"
+            placeholder={formContent.phonePlaceholder}
             {...register("phone")}
           />
           <FieldError message={errors.phone?.message} />
@@ -151,12 +150,12 @@ export function ContactInquiryForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="text-sm font-medium text-slate-950" htmlFor="email">
-            이메일
+            {formContent.emailLabel}
           </label>
           <input
             className={cn(fieldClasses, "mt-2")}
             id="email"
-            placeholder="hello@hitpick.kr"
+            placeholder={formContent.emailPlaceholder}
             type="email"
             {...register("email")}
           />
@@ -166,12 +165,12 @@ export function ContactInquiryForm() {
         {inquiryType === "creator" ? (
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="channelName">
-              활동명/채널명
+              {formContent.channelNameLabel}
             </label>
             <input
               className={cn(fieldClasses, "mt-2")}
               id="channelName"
-              placeholder="예: hitpick_creator"
+              placeholder={formContent.channelNamePlaceholder}
               {...register("channelName")}
             />
             <FieldError message={errors.channelName?.message} />
@@ -181,12 +180,12 @@ export function ContactInquiryForm() {
         {inquiryType === "advertiser" ? (
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="brandName">
-              회사명/브랜드명
+              {formContent.brandNameLabel}
             </label>
             <input
               className={cn(fieldClasses, "mt-2")}
               id="brandName"
-              placeholder="예: 히트픽 브랜드"
+              placeholder={formContent.brandNamePlaceholder}
               {...register("brandName")}
             />
             <FieldError message={errors.brandName?.message} />
@@ -196,12 +195,12 @@ export function ContactInquiryForm() {
         {inquiryType === "partnership" ? (
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="companyName">
-              회사/기관명
+              {formContent.companyNameLabel}
             </label>
             <input
               className={cn(fieldClasses, "mt-2")}
               id="companyName"
-              placeholder="예: 히트픽 파트너스"
+              placeholder={formContent.companyNamePlaceholder}
               {...register("companyName")}
             />
             <FieldError message={errors.companyName?.message} />
@@ -217,15 +216,15 @@ export function ContactInquiryForm() {
                 className="text-sm font-medium text-slate-950"
                 htmlFor="activityChannel"
               >
-                주요 활동 채널
+                {formContent.activityChannelLabel}
               </label>
               <select
                 className={cn(fieldClasses, "mt-2")}
                 id="activityChannel"
                 {...register("activityChannel")}
               >
-                <option value="">선택해 주세요</option>
-                {activityChannelOptions.map((option) => (
+                <option value="">{formContent.selectPlaceholder}</option>
+                {formContent.activityChannelOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
@@ -236,7 +235,7 @@ export function ContactInquiryForm() {
 
             <div>
               <label className="text-sm font-medium text-slate-950" htmlFor="channelUrl">
-                채널 URL
+                {formContent.channelUrlLabel}
               </label>
               <input
                 className={cn(fieldClasses, "mt-2")}
@@ -253,15 +252,15 @@ export function ContactInquiryForm() {
               className="text-sm font-medium text-slate-950"
               htmlFor="interestCampaign"
             >
-              관심 캠페인
+              {formContent.interestCampaignLabelCreator}
             </label>
             <select
               className={cn(fieldClasses, "mt-2")}
               id="interestCampaign"
               {...register("interestCampaign")}
             >
-              <option value="">선택해 주세요</option>
-              {interestCampaignOptions.map((option) => (
+              <option value="">{formContent.selectPlaceholder}</option>
+              {formContent.interestCampaignOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -272,12 +271,12 @@ export function ContactInquiryForm() {
 
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="profile">
-              자기소개/활동 분야
+              {formContent.creatorProfileLabel}
             </label>
             <textarea
               className={cn(fieldClasses, "mt-2 min-h-40 resize-none")}
               id="profile"
-              placeholder="주요 콘텐츠 주제, 활동 분야, 협업 스타일 등을 적어 주세요."
+              placeholder={formContent.creatorProfilePlaceholder}
               {...register("profile")}
             />
             <FieldError message={errors.profile?.message} />
@@ -290,15 +289,15 @@ export function ContactInquiryForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium text-slate-950" htmlFor="businessType">
-                업종
+                {formContent.industryLabel}
               </label>
               <select
                 className={cn(fieldClasses, "mt-2")}
                 id="businessType"
                 {...register("businessType")}
               >
-                <option value="">선택해 주세요</option>
-                {industryOptions.map((option) => (
+                <option value="">{formContent.selectPlaceholder}</option>
+                {formContent.industryOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
@@ -312,15 +311,15 @@ export function ContactInquiryForm() {
                 className="text-sm font-medium text-slate-950"
                 htmlFor="interestCampaign"
               >
-                원하는 캠페인 유형
+                {formContent.interestCampaignLabelAdvertiser}
               </label>
               <select
                 className={cn(fieldClasses, "mt-2")}
                 id="interestCampaign"
                 {...register("interestCampaign")}
               >
-                <option value="">선택해 주세요</option>
-                {interestCampaignOptions.map((option) => (
+                <option value="">{formContent.selectPlaceholder}</option>
+                {formContent.interestCampaignOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
@@ -332,15 +331,15 @@ export function ContactInquiryForm() {
 
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="budgetRange">
-              예산 범위
+              {formContent.budgetRangeLabel}
             </label>
             <select
               className={cn(fieldClasses, "mt-2")}
               id="budgetRange"
               {...register("budgetRange")}
             >
-              <option value="">선택해 주세요</option>
-              {budgetRangeOptions.map((option) => (
+              <option value="">{formContent.selectPlaceholder}</option>
+              {formContent.budgetRangeOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -351,12 +350,12 @@ export function ContactInquiryForm() {
 
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="message">
-              문의 내용
+              {formContent.advertiserMessageLabel}
             </label>
             <textarea
               className={cn(fieldClasses, "mt-2 min-h-40 resize-none")}
               id="message"
-              placeholder="브랜드 목표, 희망 일정, 타깃 오디언스, 요청 사항 등을 적어 주세요."
+              placeholder={formContent.advertiserMessagePlaceholder}
               {...register("message")}
             />
             <FieldError message={errors.message?.message} />
@@ -368,15 +367,15 @@ export function ContactInquiryForm() {
         <>
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="partnerType">
-              제휴 유형
+              {formContent.partnerTypeLabel}
             </label>
             <select
               className={cn(fieldClasses, "mt-2")}
               id="partnerType"
               {...register("partnerType")}
             >
-              <option value="">선택해 주세요</option>
-              {partnershipTypeOptions.map((option) => (
+              <option value="">{formContent.selectPlaceholder}</option>
+              {formContent.partnerTypeOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -387,12 +386,12 @@ export function ContactInquiryForm() {
 
           <div>
             <label className="text-sm font-medium text-slate-950" htmlFor="message">
-              문의 내용
+              {formContent.partnershipMessageLabel}
             </label>
             <textarea
               className={cn(fieldClasses, "mt-2 min-h-40 resize-none")}
               id="message"
-              placeholder="제휴 목적, 협업 방식, 기대하는 방향 등을 적어 주세요."
+              placeholder={formContent.partnershipMessagePlaceholder}
               {...register("message")}
             />
             <FieldError message={errors.message?.message} />
@@ -402,21 +401,20 @@ export function ContactInquiryForm() {
 
       <div className="flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-2xl text-sm leading-7 text-slate-600">
-          제출 시 현재는 브라우저 콘솔에 값이 출력되고 성공 메시지가
-          표시됩니다. 추후 API 연동은 분리된 submit handler에 연결하면 됩니다.
+          {formContent.helperText}
         </p>
         <CTAButton className="w-full sm:w-auto" type="submit">
-          {isSubmitting ? "전송 중..." : "히트픽 문의 보내기"}
+          {isSubmitting ? formContent.submitPending : formContent.submitIdle}
         </CTAButton>
       </div>
 
       {submittedType ? (
         <div className="rounded-[22px] border border-[rgba(72,211,196,0.26)] bg-[rgba(72,211,196,0.1)] px-4 py-3 text-sm text-slate-900">
           {submittedType === "creator"
-            ? "크리에이터 참여 문의가 정상적으로 준비되었습니다."
+            ? formContent.successCreator
             : submittedType === "advertiser"
-              ? "광고주 캠페인 문의가 정상적으로 준비되었습니다."
-              : "파트너십/제휴 문의가 정상적으로 준비되었습니다."}
+              ? formContent.successAdvertiser
+              : formContent.successPartnership}
         </div>
       ) : null}
     </form>

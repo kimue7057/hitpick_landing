@@ -12,6 +12,11 @@
   --accent-strong: #ff5a36;
   --accent-secondary: #48d3c4;
   --shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  --font-plus-jakarta:
+    "Pretendard Variable", "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo",
+    "Segoe UI", sans-serif;
+  --font-space-grotesk:
+    "Space Grotesk", "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
 @theme inline {

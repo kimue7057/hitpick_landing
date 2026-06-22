@@ -1,18 +1,7 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import "./globals.css";
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -29,10 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ko"
-      className={`${plusJakartaSans.variable} ${spaceGrotesk.variable} h-full`}
-    >
+    <html lang="ko" className="h-full">
       <body className="min-h-full bg-[var(--background)] text-[var(--text)] antialiased">
         <div className="relative isolate flex min-h-screen flex-col overflow-x-clip">
           <div
