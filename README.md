@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hitpick Landing
 
-## Getting Started
+Hitpick is a global creator matching platform that connects brands aiming for international growth with creators who fit each market, audience, and content style.
 
-First, run the development server:
+This repository contains the Next.js landing and platform-style homepage for Hitpick. The current homepage was refactored from a Figma Make output into a production-ready React + TypeScript + Tailwind structure while preserving the original visual direction.
+
+## Local Preview
+
+- Main local URL: [http://localhost:3000](http://localhost:3000)
+- Alternate local URL sometimes running in parallel: [http://localhost:3001](http://localhost:3001)
+
+## Homepage Structure
+
+The homepage is organized into these sections:
+
+- `Header`
+- `HeroSection`
+- `StatStrip`
+- `CampaignBoard`
+- `CreatorNetwork`
+- `MatchingEngine`
+- `SplitCTA`
+- `FinalCTA`
+- `Footer`
+
+## Key Files
+
+- `src/components/pages/home-page.tsx`
+- `src/components/home/`
+- `src/content/home-platform.ts`
+- `src/components/layout/root-layout-shell.tsx`
+
+## Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+## Run Locally
+
+Install dependencies and start the dev server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Validation Commands
 
-## Learn More
+```bash
+pnpm exec tsc --noEmit
+pnpm exec eslint src/app/layout.tsx src/app/page.tsx src/app/en/page.tsx src/components/layout/root-layout-shell.tsx src/components/pages/home-page.tsx src/components/home src/content/home-platform.ts
+pnpm build:next
+```
 
-To learn more about Next.js, take a look at the following resources:
+Note:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `pnpm exec eslint .` may fail because of an existing lint issue in `.open-next/cloudflare/init.js` that is unrelated to the homepage refactor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Continue On Another Computer
 
-## Deploy on Vercel
+Clone the repository, move to the current working branch, install dependencies, and run the project:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+git clone https://github.com/kimue7057/hitpick_landing.git
+cd hitpick_landing
+git checkout feature/hitpick-campaign-landing-preview
+pnpm install
+pnpm dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If the branch is not available remotely yet, push it first from the current computer:
+
+```bash
+git checkout feature/hitpick-campaign-landing-preview
+git add .
+git commit -m "Refactor Hitpick homepage"
+git push -u origin feature/hitpick-campaign-landing-preview
+```
+
+Then on the other computer:
+
+```bash
+git clone https://github.com/kimue7057/hitpick_landing.git
+cd hitpick_landing
+git fetch origin
+git checkout feature/hitpick-campaign-landing-preview
+pnpm install
+pnpm dev
+```
+
+## Design Direction
+
+The homepage keeps the platform-first visual tone from the Figma Make draft:
+
+- premium SaaS feel
+- blue and lime accents
+- dashboard-style hero
+- campaign cards
+- creator cards
+- matching score UI
+- global market tags
+- responsive layout for desktop, tablet, and mobile
